@@ -13,7 +13,8 @@
   "routes": [
     { "pattern": "blackindieromance.com", "custom_domain": true },
     { "pattern": "www.blackindieromance.com", "custom_domain": true }
-  ]
-  // workers_dev / preview_urls get switched off once the domain is confirmed,
-  // so the account-name address stops being public.
+  ],
+  // Off so the account-name workers.dev address isn't a public way in.
+  "workers_dev": false,
+  "preview_urls": false
 }
