@@ -1,0 +1,12 @@
+---
+import { amazonUrl } from '../lib/util';
+interface Props {
+  asin: string;
+  linkType: 'attribution' | 'associates';
+  attributionUrl?: string;
+  title: string;
+  label?: string;
+}
+const { asin, linkType, attributionUrl, title, label = 'Read on Amazon' } = Astro.props;
+---
+<a class="btn btn-solid" href={amazonUrl({ asin, linkType, attributionUrl })} rel="sponsored nofollow" aria-label={`${label}: ${title}`}>{label}</a>

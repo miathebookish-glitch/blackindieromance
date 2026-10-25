@@ -1,0 +1,84 @@
+---
+import Base from '../../layouts/Base.astro';
+import Cover from '../../components/Cover.astro';
+import Heat from '../../components/Heat.astro';
+import TropeChips from '../../components/TropeChips.astro';
+import AmazonButton from '../../components/AmazonButton.astro';
+import DisclosureLine from '../../components/DisclosureLine.astro';
+import ListCard from '../../components/ListCard.astro';
+import { render } from 'astro:content';
+import { allBooks, listsForBook, seriesBooks, type Book } from '../../lib/data';
+import { HEAT_LEVELS, SITE } from '../../lib/site';
+import { amazonUrl } from '../../lib/util';
+
+export async function getStaticPaths() {
+  return (await allBooks()).map((book) => ({ params: { slug: book.id }, props: { book } }));
+}
+
+const { book } = Astro.props as { book: Book };
+const b = book.data;
+const { Content } = await render(book);
+const inLists = await listsForBook(book.id);
+const series = await seriesBooks(book);
+const heatName = HEAT_LEVELS.find((h) => h.level === b.heat)?.name;
+const title = `${b.title} by ${b.author}: tropes, heat level and series order`;
+const description = `${b.hook} A reading guide to ${b.title} by ${b.author}: tropes, heat level (${b.heat}/5), content notes${b.series ? ' and series order' : ''}.`;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Book',
+  name: b.title,
+  author: { '@type': 'Person', name: b.author },
+  url: new URL(`/books/${book.id}/`, SITE.url).href,
+  ...(b.series ? { isPartOf: { '@type': 'BookSeries', name: b.series }, position: b.seriesOrder } : {}),
+  workExample: { '@type': 'Book', bookFormat: 'https://schema.org/EBook', potentialAction: { '@type': 'ReadAction', target: amazonUrl(b) } },
+};
+---
+<Base title={title} description={description} image={b.cover} type="book" jsonLd={jsonLd}>
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb" style="padding-top:16px">
+      <ol><li><a href="/">Home</a></li><li><a href="/lists/">Book lists</a></li><li>{b.title}</li></ol>
+    </nav>
+    <div class="guide">
+      <div class="guide-cover">
+        <Cover title={b.title} author={b.author} series={b.series} cover={b.cover} seed={book.id} eager />
+      </div>
+      <div class="guide-body">
+        <p class="eyebrow" style="font-size:12px">Book guide</p>
+        <h1 class="h1">{b.title}</h1>
+        <p class="meta" style="font-size:16px">{b.author}{b.series ? ` · Book ${b.seriesOrder ?? ''} of ${b.series}` : ' · Standalone'}</p>
+        <p class="hook" style="font-size:22px">{b.hook}</p>
+        {b.teamTitle && <DisclosureLine team={true} />}
+        <div class="entry-row">
+          <Heat level={b.heat} />
+          {b.ku && <span class="badge badge-ku">Read free in Kindle Unlimited</span>}
+          {b.hea && <span class="badge badge-hea">HEA</span>}
+        </div>
+        <div class="btn-row"><AmazonButton asin={b.asin} linkType={b.linkType} attributionUrl={b.attributionUrl} title={b.title} /></div>
+        <div class="prose"><Content /></div>
+        {b.readerNote && <p class="reader-note">{b.readerNote}</p>}
+        <dl class="facts">
+          <dt>Tropes</dt><dd><TropeChips tropes={b.tropes} /></dd>
+          <dt>Heat</dt><dd>{b.heat}/5 · {heatName}</dd>
+          <dt>Content notes</dt><dd>{b.contentNotes.length ? b.contentNotes.join(', ') : 'None listed'}</dd>
+          <dt>Ending</dt><dd>{b.hea ? 'Happily ever after' : 'Not a guaranteed HEA in this book'}</dd>
+          <dt>Kindle Unlimited</dt><dd>{b.ku ? 'Yes' : 'No'}</dd>
+        </dl>
+        {series.length > 1 && (
+          <section aria-labelledby="series-heading" style="display:flex;flex-direction:column;gap:8px">
+            <h2 id="series-heading" style="font-size:26px">{b.series} <em>in order</em></h2>
+            <ol class="series-order">
+              {series.map((s) => <li>{s.id === book.id ? <strong>{s.data.title}</strong> : <a href={`/books/${s.id}/`}>{s.data.title}</a>}</li>)}
+            </ol>
+          </section>
+        )}
+      </div>
+    </div>
+  </div>
+  {inLists.length > 0 && (
+    <section class="wrap section" style="padding-top:8px" aria-labelledby="in-lists">
+      <h2 id="in-lists" class="h2" style="margin-bottom:28px">Find it <em>on these lists</em></h2>
+      <div class="card-grid">{inLists.slice(0, 3).map((l, i) => <ListCard list={l} i={i} />)}</div>
+    </section>
+  )}
+</Base>

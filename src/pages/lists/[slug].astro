@@ -1,0 +1,128 @@
+---
+import Base from '../../layouts/Base.astro';
+import BookEntry from '../../components/BookEntry.astro';
+import Cover from '../../components/Cover.astro';
+import AccentTitle from '../../components/AccentTitle.astro';
+import DisclosureLine from '../../components/DisclosureLine.astro';
+import PinBlock from '../../components/PinBlock.astro';
+import ListCard from '../../components/ListCard.astro';
+import { render } from 'astro:content';
+import { allLists, listBooks, quickPicks, type List } from '../../lib/data';
+import { amazonUrl, formatMonthYear, readMinutes, slugify } from '../../lib/util';
+import { SITE } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const lists = await allLists();
+  return lists.map((list) => ({ params: { slug: list.id }, props: { list } }));
+}
+
+const { list } = Astro.props as { list: List };
+const d = list.data;
+const entries = await listBooks(list);
+const picks = await quickPicks(list);
+const { Content } = await render(list);
+const team = entries.some((e) => e.book.data.teamTitle);
+const allKu = entries.every((e) => e.book.data.ku);
+const words = (list.body ?? '').split(/\s+/).length + entries.length * 70;
+const path = `/lists/${list.id}/`;
+const kicker = d.title.match(/^\d+\s/) ? `${d.title.split(' ')[0]} Black romances` : 'Black romance';
+
+const related = (await allLists())
+  .filter((l) => l.id !== list.id)
+  .map((l) => ({ l, score: l.data.tropes.filter((t) => d.tropes.includes(t)).length + (l.data.kind === d.kind ? 0.5 : 0) }))
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 3)
+  .map((x) => x.l);
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: d.title,
+    description: d.description,
+    datePublished: d.published.toISOString(),
+    dateModified: (d.updated ?? d.published).toISOString(),
+    publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+    mainEntityOfPage: new URL(path, SITE.url).href,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: d.title,
+    numberOfItems: entries.length,
+    itemListElement: entries.map((e, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Book',
+        name: e.book.data.title,
+        author: { '@type': 'Person', name: e.book.data.author },
+        url: new URL(`/books/${e.book.id}/`, SITE.url).href,
+      },
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE.url + '/' },
+      { '@type': 'ListItem', position: 2, name: 'Book lists', item: SITE.url + '/lists/' },
+      { '@type': 'ListItem', position: 3, name: d.title },
+    ],
+  },
+];
+---
+<Base title={d.title} description={d.description} image={d.pinImage ?? d.heroImage} type="article" jsonLd={jsonLd} published={d.published} updated={d.updated}>
+  <article>
+    <header class="read article-head">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/">Home</a></li>
+          <li><a href="/lists/">Book lists</a></li>
+          {d.tropes[0] && <li><a href={`/tropes/${slugify(d.tropes[0])}/`}>{d.tropes[0]}</a></li>}
+        </ol>
+      </nav>
+      <h1 class="h1"><AccentTitle text={d.title} accent={d.accent} /></h1>
+      <p class="meta">
+        {d.updated ? `Updated ${formatMonthYear(d.updated)}` : formatMonthYear(d.published)} · {readMinutes(words)} min read
+      </p>
+      <div class="lede prose"><Content /></div>
+      <DisclosureLine team={team} />
+      <div class="article-hero">
+        {d.heroImage
+          ? <img src={d.heroImage} alt={d.heroAlt ?? ''} width="1200" height="800" />
+          : entries.slice(0, 3).map(({ book }) => <Cover title={book.data.title} author={book.data.author} series={book.data.series} cover={book.data.cover} seed={book.id} />)}
+      </div>
+      {picks.length > 0 && (
+        <aside class="quick-picks" aria-labelledby="qp-heading">
+          <h2 id="qp-heading">Quick <em>picks</em></h2>
+          <ul>
+            {picks.map((p) => (
+              <li><strong>{p.label}:</strong> <a href={`#${p.book.id}`}>{p.book.data.title}</a> by {p.book.data.author}</li>
+            ))}
+          </ul>
+          {allKu && <p style="margin:0;font-size:15px">Every book on this list is in Kindle Unlimited.</p>}
+        </aside>
+      )}
+    </header>
+
+    <section class="read" style="padding-top:24px" aria-label="The list">
+      <ol class="entries">
+        {entries.map((e, i) => <BookEntry n={i + 1} book={e.book} hook={e.hook} />)}
+      </ol>
+    </section>
+
+    <div class="read" style="padding-block:48px">
+      <PinBlock title={d.title} accent={d.accent} kicker={kicker} path={path} pinImage={d.pinImage} description={d.description} />
+    </div>
+  </article>
+
+  {related.length > 0 && (
+    <section class="wrap section" style="padding-top:8px" aria-labelledby="next-heading">
+      <h2 id="next-heading" class="h2" style="margin-bottom:28px">Read <em>next</em></h2>
+      <div class="card-grid">
+        {related.map((l, i) => <ListCard list={l} i={i + 1} />)}
+      </div>
+    </section>
+  )}
+</Base>

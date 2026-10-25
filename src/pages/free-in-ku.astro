@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import BookGrid from '../components/BookGrid.astro';
+import { allBooks, isThin } from '../lib/data';
+const books = (await allBooks()).filter((b) => b.data.ku);
+---
+<Base title="Black romance free in Kindle Unlimited" description="Black romance novels you can read free with a Kindle Unlimited subscription." noindex={isThin(books.length)}>
+  <section class="wrap section">
+    <h1 class="h1" style="margin-bottom:12px">Free in <em>Kindle Unlimited</em></h1>
+    <p class="lede" style="margin-bottom:12px">Black romance you can read with a KU subscription. KU status can change, so check the Amazon page before you borrow.</p>
+    <p class="meta" style="margin-bottom:40px">We earn from qualifying Amazon purchases. <a href="/disclosure/">Disclosure</a></p>
+    <BookGrid books={books} />
+  </section>
+</Base>

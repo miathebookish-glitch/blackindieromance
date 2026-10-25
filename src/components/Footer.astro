@@ -1,0 +1,17 @@
+---
+import { SITE, DISCLOSURE_FULL } from '../lib/site';
+---
+<footer class="site-footer">
+  <div class="wrap">
+    <div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 12px;">
+      <a class="logo" href="/">Black Indie <em>Romance</em></a>
+      <p>{DISCLOSURE_FULL}</p>
+      <p>© {new Date().getFullYear()} Black Indie Romance</p>
+    </div>
+    <nav aria-label="Footer">
+      <a href="/about/">About</a>
+      <a href="/disclosure/">Disclosure</a>
+      <a href={SITE.pinterestProfile} rel="me noopener">Pinterest</a>
+    </nav>
+  </div>
+</footer>

@@ -1,0 +1,22 @@
+---
+import Base from '../../layouts/Base.astro';
+import BookGrid from '../../components/BookGrid.astro';
+import Heat from '../../components/Heat.astro';
+import { allBooks, isThin } from '../../lib/data';
+import { HEAT_LEVELS } from '../../lib/site';
+
+export function getStaticPaths() {
+  return HEAT_LEVELS.map((h) => ({ params: { level: h.slug }, props: { h } }));
+}
+const { h } = Astro.props;
+const books = (await allBooks()).filter((b) => b.data.heat === h.level);
+---
+<Base title={`${h.name} Black romance books (heat ${h.level}/5)`} description={`${h.desc} Black romance novels at heat level ${h.level} of 5.`} noindex={isThin(books.length)}>
+  <section class="wrap section">
+    <nav class="crumbs" aria-label="Breadcrumb" style="margin-bottom:16px"><ol><li><a href="/">Home</a></li><li><a href="/heat/">Heat level</a></li><li>{h.name}</li></ol></nav>
+    <Heat level={h.level} label={false} size={22} />
+    <h1 class="h1" style="margin:12px 0"><em>{h.name}</em> reads</h1>
+    <p class="lede" style="margin-bottom:40px">{h.desc}</p>
+    {books.length ? <BookGrid books={books} /> : <p class="meta">Books at this heat level are on the way.</p>}
+  </section>
+</Base>

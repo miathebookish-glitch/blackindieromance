@@ -1,0 +1,15 @@
+---
+import Base from '../../layouts/Base.astro';
+import ListCard from '../../components/ListCard.astro';
+import { allLists } from '../../lib/data';
+const lists = await allLists();
+---
+<Base title="Black romance book lists" description="Every Black romance book list on the site, newest first: trope lists, read-alikes, vibe lists and seasonal picks.">
+  <section class="wrap section">
+    <div class="section-head" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <h1 class="h1">Book <em>lists</em></h1>
+      <p class="lede">Trope lists, read-alikes, vibes and seasonal picks. Newest first.</p>
+    </div>
+    <div class="card-grid">{lists.map((l, i) => <ListCard list={l} i={i} />)}</div>
+  </section>
+</Base>

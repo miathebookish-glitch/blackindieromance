@@ -1,0 +1,10 @@
+---
+// Renders a title with one phrase set in maroon italics.
+interface Props { text: string; accent?: string }
+const { text, accent } = Astro.props;
+const i = accent ? text.toLowerCase().indexOf(accent.toLowerCase()) : -1;
+const pre = i >= 0 ? text.slice(0, i) : text;
+const mid = i >= 0 ? text.slice(i, i + accent!.length) : '';
+const post = i >= 0 ? text.slice(i + accent!.length) : '';
+---
+{pre}{mid && <em>{mid}</em>}{post}

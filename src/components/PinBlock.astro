@@ -1,0 +1,27 @@
+---
+import { SITE } from '../lib/site';
+import { pinterestSaveUrl } from '../lib/util';
+interface Props { title: string; accent?: string; kicker: string; path: string; pinImage?: string; description: string }
+const { title, accent, kicker, path, pinImage, description } = Astro.props;
+const pageUrl = new URL(path, SITE.url).href;
+const imageUrl = pinImage ? new URL(pinImage, SITE.url).href : `${SITE.url}/favicon.svg`;
+const i = accent ? title.toLowerCase().indexOf(accent.toLowerCase()) : -1;
+---
+<section class="pin-block" aria-labelledby="save-heading">
+  <div class="pin-preview" aria-hidden="true">
+    {pinImage ? <img src={pinImage} alt="" loading="lazy" /> : (
+      <>
+        <span class="pp-top">{kicker}</span>
+        <span class="pp-title">
+          {i >= 0 ? <>{title.slice(0, i)}<em>{title.slice(i, i + accent!.length)}</em>{title.slice(i + accent!.length)}</> : title}
+        </span>
+        <span class="pp-url">blackindieromance.com</span>
+      </>
+    )}
+  </div>
+  <div style="flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:14px">
+    <h2 id="save-heading" style="font-size:30px">Save this <em>for later</em></h2>
+    <p style="margin:0;color:var(--text-2)">Pin it to your TBR board so it's there when you need a new obsession.</p>
+    <a class="btn btn-ghost" style="align-self:flex-start" href={pinterestSaveUrl(pageUrl, imageUrl, description)} rel="noopener" target="_blank">Save to Pinterest</a>
+  </div>
+</section>

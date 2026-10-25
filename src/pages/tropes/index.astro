@@ -1,0 +1,16 @@
+---
+import Base from '../../layouts/Base.astro';
+import { tropeIndex } from '../../lib/data';
+const tropes = await tropeIndex();
+---
+<Base title="Black romance books by trope" description="Browse Black romance novels by trope: touch her and die, bodyguard, enemies to lovers, slow burn, second chance and more.">
+  <section class="wrap section">
+    <h1 class="h1" style="margin-bottom:12px">Browse by <em>trope</em></h1>
+    <p class="lede" style="margin-bottom:36px">Pick the trope you're craving.</p>
+    <ul class="chips" style="list-style:none;margin:0;padding:0">
+      {tropes.map((t) => (
+        <li><a class="chip chip-lg" style="background:var(--surface)" href={`/tropes/${t.slug}/`}>{t.name} <span class="meta" style="margin-left:8px">{t.books.length}</span></a></li>
+      ))}
+    </ul>
+  </section>
+</Base>

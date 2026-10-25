@@ -1,0 +1,7 @@
+---
+interface Props { team: boolean }
+const { team } = Astro.props;
+---
+<p class="disclosure-line">
+  {team ? 'Some books on this page are written by members of our team. ' : ''}We earn from qualifying Amazon purchases. <a href="/disclosure/">Our disclosure</a>
+</p>

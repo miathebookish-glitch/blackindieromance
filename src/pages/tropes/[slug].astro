@@ -1,0 +1,31 @@
+---
+import Base from '../../layouts/Base.astro';
+import ListCard from '../../components/ListCard.astro';
+import BookGrid from '../../components/BookGrid.astro';
+import { tropeIndex, isThin } from '../../lib/data';
+
+export async function getStaticPaths() {
+  return (await tropeIndex()).map((t) => ({ params: { slug: t.slug }, props: { t } }));
+}
+const { t } = Astro.props;
+const count = t.books.length + t.lists.length;
+---
+<Base title={`${t.name} romance books by Black authors`} description={`Black romance novels with the ${t.name} trope, with heat level and Kindle Unlimited status for every pick.`} noindex={isThin(count)}>
+  <section class="wrap section">
+    <nav class="crumbs" aria-label="Breadcrumb" style="margin-bottom:16px"><ol><li><a href="/">Home</a></li><li><a href="/tropes/">Tropes</a></li><li>{t.name}</li></ol></nav>
+    <h1 class="h1" style="margin-bottom:12px"><em>{t.name}</em> romance</h1>
+    <p class="lede" style="margin-bottom:40px">Black romance novels with the {t.name} trope.</p>
+    {t.lists.length > 0 && (
+      <>
+        <h2 class="h2" style="margin-bottom:24px">Lists</h2>
+        <div class="card-grid" style="margin-bottom:56px">{t.lists.map((l, i) => <ListCard list={l} i={i} />)}</div>
+      </>
+    )}
+    {t.books.length > 0 && (
+      <>
+        <h2 class="h2" style="margin-bottom:24px">Books</h2>
+        <BookGrid books={t.books} />
+      </>
+    )}
+  </section>
+</Base>

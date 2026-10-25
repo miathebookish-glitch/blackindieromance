@@ -1,0 +1,23 @@
+---
+import Cover from './Cover.astro';
+import AccentTitle from './AccentTitle.astro';
+import { listBooks, type List } from '../lib/data';
+
+interface Props { list: List; i?: number }
+const { list, i = 0 } = Astro.props;
+const tones = ['var(--tint-1)', 'var(--tint-4)', 'var(--tint-5)', 'var(--tint-2)', 'var(--surface)', 'var(--tint-3)'];
+const kindLabel: Record<string, string> = {
+  trope: 'Trope list', comp: 'If you loved', vibe: 'Vibe list', seasonal: 'Seasonal',
+  authors: 'Authors', setting: 'Set in', gift: 'Gift guide', 'how-to': 'How-to',
+};
+const books = (await listBooks(list)).slice(0, 3);
+---
+<a class="list-card" href={`/lists/${list.id}/`}>
+  <div class="shelf" style={`background:${tones[i % tones.length]}`}>
+    {list.data.heroImage
+      ? <img src={list.data.heroImage} alt={list.data.heroAlt ?? ''} loading="lazy" decoding="async" />
+      : books.map(({ book }) => <Cover title={book.data.title} author={book.data.author} series={book.data.series} cover={book.data.cover} seed={book.id} />)}
+  </div>
+  <span class="lc-tag">{kindLabel[list.data.kind]}</span>
+  <span class="lc-title"><AccentTitle text={list.data.title} accent={list.data.accent} /></span>
+</a>

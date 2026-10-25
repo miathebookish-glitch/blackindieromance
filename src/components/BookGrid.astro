@@ -1,0 +1,19 @@
+---
+import Cover from './Cover.astro';
+import Heat from './Heat.astro';
+import type { Book } from '../lib/data';
+interface Props { books: Book[] }
+const { books } = Astro.props;
+---
+<ul style="list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:32px 24px">
+  {books.map((b) => (
+    <li>
+      <a href={`/books/${b.id}/`} style="display:flex;flex-direction:column;gap:10px;text-decoration:none;color:var(--ink)">
+        <Cover title={b.data.title} author={b.data.author} series={b.data.series} cover={b.data.cover} seed={b.id} />
+        <span style="font-family:var(--serif);font-size:20px;line-height:1.2">{b.data.title}</span>
+        <span class="meta">{b.data.author}</span>
+        <Heat level={b.data.heat} label={false} size={14} />
+      </a>
+    </li>
+  ))}
+</ul>

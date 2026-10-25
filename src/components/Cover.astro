@@ -1,0 +1,34 @@
+---
+// A book cover. Uses the real image when one is set, otherwise draws a
+// typographic placeholder in the site palette (never imitating a real cover).
+interface Props {
+  title: string;
+  author: string;
+  series?: string;
+  cover?: string;
+  seed?: string;
+  class?: string;
+  eager?: boolean;
+}
+const { title, author, series, cover, seed = title, class: cls = '', eager = false } = Astro.props;
+const palettes = [
+  { bg: '#7B1E3A', fg: '#F8F5F5', top: '#E9B8B2' },
+  { bg: '#26141B', fg: '#F8F5F5', top: '#E9B8B2' },
+  { bg: '#E9B8B2', fg: '#26141B', top: '#7B1E3A' },
+  { bg: '#C98A93', fg: '#26141B', top: '#26141B' },
+];
+let h = 0;
+for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+const p = palettes[h % palettes.length];
+---
+<div class={`cover ${cls}`}>
+  {cover ? (
+    <img src={cover} alt={`Cover of ${title} by ${author}`} loading={eager ? 'eager' : 'lazy'} decoding="async" width="400" height="600" />
+  ) : (
+    <div class="cover-type" style={`background:${p.bg};color:${p.fg}`} role="img" aria-label={`${title} by ${author}`}>
+      <span class="ct-series" style={`color:${p.top}`}>{series ?? 'A romance'}</span>
+      <span class="ct-title">{title}</span>
+      <span class="ct-author">{author}</span>
+    </div>
+  )}
+</div>

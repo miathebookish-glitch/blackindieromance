@@ -1,0 +1,9 @@
+---
+import { slugify } from '../lib/util';
+interface Props { tropes: string[]; max?: number; large?: boolean }
+const { tropes, max, large = false } = Astro.props;
+const shown = max ? tropes.slice(0, max) : tropes;
+---
+<ul class="chips" style="list-style:none;margin:0;padding:0">
+  {shown.map((t) => <li><a class={large ? 'chip chip-lg' : 'chip'} href={`/tropes/${slugify(t)}/`}>{t}</a></li>)}
+</ul>

@@ -1,0 +1,13 @@
+---
+import Base from '../layouts/Base.astro';
+import ListCard from '../components/ListCard.astro';
+import { allLists } from '../lib/data';
+const lists = (await allLists()).slice(0, 3);
+---
+<Base title="Page not found" noindex>
+  <section class="wrap section">
+    <h1 class="h1" style="margin-bottom:12px">This page <em>ghosted</em> you.</h1>
+    <p class="lede" style="margin-bottom:40px">Not the kind of disappearing act we recommend. Try one of these instead.</p>
+    <div class="card-grid">{lists.map((l, i) => <ListCard list={l} i={i} />)}</div>
+  </section>
+</Base>

@@ -1,0 +1,20 @@
+---
+import Base from '../../layouts/Base.astro';
+import Heat from '../../components/Heat.astro';
+import { HEAT_LEVELS } from '../../lib/site';
+---
+<Base title="Black romance books by heat level" description="Find Black romance by heat level, from closed-door sweet to scorching.">
+  <section class="wrap section">
+    <h1 class="h1" style="margin-bottom:12px">Pick your <em>heat</em></h1>
+    <p class="lede" style="margin-bottom:36px">From closed-door to scorching. No surprises.</p>
+    <div class="heat-grid">
+      {HEAT_LEVELS.map((h) => (
+        <a class={`heat-tile ht-${h.level}`} href={`/heat/${h.slug}/`}>
+          <Heat level={h.level} label={false} />
+          <span class="ht-name">{h.name}</span>
+          <span class="ht-desc">{h.desc}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+</Base>

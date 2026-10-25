@@ -1,0 +1,36 @@
+---
+import Cover from './Cover.astro';
+import Heat from './Heat.astro';
+import TropeChips from './TropeChips.astro';
+import AmazonButton from './AmazonButton.astro';
+import type { Book } from '../lib/data';
+
+interface Props { n: number; book: Book; hook: string }
+const { n, book, hook } = Astro.props;
+const b = book.data;
+const seriesLine = b.series ? `Book ${b.seriesOrder ?? ''} of ${b.series}`.replace('Book  of', 'Book of') : 'Standalone';
+---
+<li class="entry" id={book.id}>
+  <div class="entry-side">
+    <span class="entry-num" aria-hidden="true">{String(n).padStart(2, '0')}</span>
+    <a href={`/books/${book.id}/`} tabindex="-1" aria-hidden="true">
+      <Cover title={b.title} author={b.author} series={b.series} cover={b.cover} seed={book.id} />
+    </a>
+  </div>
+  <div class="entry-body">
+    <h3><span class="visually-hidden">{n}. </span><a href={`/books/${book.id}/`}>{b.title}</a></h3>
+    <p class="meta">{b.author} · {seriesLine}</p>
+    <p class="hook">{hook}</p>
+    {b.readerNote && <p class="reader-note">{b.readerNote}</p>}
+    <TropeChips tropes={b.tropes} max={4} />
+    <div class="entry-row">
+      <Heat level={b.heat} />
+      {b.ku && <span class="badge badge-ku">Read free in Kindle Unlimited</span>}
+      {b.hea && <span class="badge badge-hea">HEA</span>}
+    </div>
+    <div class="entry-row">
+      <AmazonButton asin={b.asin} linkType={b.linkType} attributionUrl={b.attributionUrl} title={b.title} />
+      <a href={`/books/${book.id}/`} style="font-weight:700;font-size:15px">Book guide</a>
+    </div>
+  </div>
+</li>

@@ -1,0 +1,113 @@
+---
+import Base from '../layouts/Base.astro';
+import Cover from '../components/Cover.astro';
+import Heat from '../components/Heat.astro';
+import ListCard from '../components/ListCard.astro';
+import TropeChips from '../components/TropeChips.astro';
+import { allBooks, allLists, tropeIndex } from '../lib/data';
+import { HEAT_LEVELS, SITE } from '../lib/site';
+
+const lists = (await allLists()).slice(0, 6);
+const books = await allBooks();
+const tropes = (await tropeIndex()).slice(0, 12);
+const heroBooks = books.slice(0, 3);
+// Featured guide: the first team title, else the first book.
+const featured = books.find((b) => b.data.teamTitle) ?? books[0];
+const ribbon = tropes.map((t) => t.name);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.name,
+  url: SITE.url,
+  description: SITE.description,
+};
+---
+<Base title={SITE.name} jsonLd={jsonLd}>
+  <section class="wrap hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Romance novels by Black authors, with Black leads</p>
+      <h1 class="display">Black love, <em>well read.</em></h1>
+      <p class="lede" style="max-width:520px">Book lists and reading guides for your next swoon. Every pick comes with its tropes, heat level and content notes up front, and a happily ever after.</p>
+      <div class="btn-row">
+        <a class="btn btn-solid" href="/lists/">Find your next read</a>
+        <a class="btn btn-ghost" href="/tropes/">Browse by trope</a>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="fan">
+        {heroBooks.map((b, i) => (
+          <Cover class={`f${i + 1}`} title={b.data.title} author={b.data.author} series={b.data.series} cover={b.data.cover} seed={b.id} eager />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {ribbon.length > 0 && (
+    <div class="ribbon" aria-hidden="true">
+      <p>{[...ribbon, ...ribbon].map((t) => <>{t}<span>♥</span></>)}</p>
+    </div>
+  )}
+
+  <section class="wrap section" aria-labelledby="heat-heading">
+    <div class="section-head" style="flex-direction:column;gap:4px;align-items:flex-start">
+      <h2 id="heat-heading" class="h2">Pick your <em>heat</em></h2>
+      <p class="meta" style="font-size:16px">From closed-door to scorching. No surprises.</p>
+    </div>
+    <div class="heat-grid">
+      {HEAT_LEVELS.map((h) => (
+        <a class={`heat-tile ht-${h.level}`} href={`/heat/${h.slug}/`}>
+          <Heat level={h.level} label={false} />
+          <span class="ht-name">{h.name}</span>
+          <span class="ht-desc">{h.desc}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="wrap section" style="padding-top:8px" aria-labelledby="lists-heading">
+    <div class="section-head">
+      <h2 id="lists-heading" class="h2">New <em>book lists</em></h2>
+      <a href="/lists/" style="font-weight:700;font-size:15px">See all lists</a>
+    </div>
+    <div class="card-grid">
+      {lists.map((l, i) => <ListCard list={l} i={i} />)}
+    </div>
+  </section>
+
+  {featured && (
+    <section class="wrap" style="padding-bottom:72px" aria-labelledby="featured-heading">
+      <div class="feature">
+        <Cover title={featured.data.title} author={featured.data.author} series={featured.data.series} cover={featured.data.cover} seed={featured.id} />
+        <div class="feature-body">
+          <p class="eyebrow" style="font-size:12px">Featured book guide</p>
+          <h2 id="featured-heading" class="h2">{featured.data.title}</h2>
+          <p class="meta" style="font-size:15px">{featured.data.author}{featured.data.series && ` · Book ${featured.data.seriesOrder ?? ''} of ${featured.data.series}`}</p>
+          <p class="hook" style="font-size:21px">{featured.data.hook}</p>
+          <TropeChips tropes={featured.data.tropes} max={3} />
+          <div class="entry-row">
+            <Heat level={featured.data.heat} />
+            {featured.data.ku && <span class="badge badge-ku">Read free in Kindle Unlimited</span>}
+            {featured.data.hea && <span class="badge badge-hea">HEA</span>}
+          </div>
+          <div class="btn-row">
+            <a class="btn btn-solid" href={`/books/${featured.id}/`}>Read the guide</a>
+          </div>
+          {featured.data.teamTitle && <p class="meta" style="font-size:13px">Written by a member of our team. <a href="/disclosure/">Disclosure</a></p>}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="band" aria-labelledby="trope-heading">
+    <div class="wrap" style="display:flex;flex-direction:column;gap:16px">
+      <h2 id="trope-heading" style="font-size:26px">Browse by <em>trope</em></h2>
+      <TropeChips tropes={tropes.map((t) => t.name)} large />
+    </div>
+  </section>
+
+  <section class="quote-band" style="margin-top:72px">
+    <p>We read widely, recommend honestly, and tell you the heat level <em>before</em> it tells you.</p>
+    <a href="/about/" style="font-weight:700;font-size:15px">Who runs this site</a>
+  </section>
+</Base>
