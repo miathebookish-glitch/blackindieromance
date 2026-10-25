@@ -8,5 +8,12 @@
     "directory": "./dist",
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash"
-  }
+  },
+  // Attach the domain (bought through Cloudflare, so the zone is in this account).
+  "routes": [
+    { "pattern": "blackindieromance.com", "custom_domain": true },
+    { "pattern": "www.blackindieromance.com", "custom_domain": true }
+  ]
+  // workers_dev / preview_urls get switched off once the domain is confirmed,
+  // so the account-name address stops being public.
 }
